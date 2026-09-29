@@ -1,0 +1,49 @@
+﻿Employee_ID,NAME,Hire_Date,Month,Hours_Worked,Coverage_Offered,Department
+E001,Ada Lovelace,2020-01-15,2024-01,160,yes,Engineering
+E002,Grace Hopper,2018-06-01,2024-01,140,no,Engineering
+E003,"Alan Turing, Jr.",2019-03-01,2024-01,80,N,Research
+E004,Katherine Johnson,03/15/2015,2024-02,129.5,TRUE,Engineering
+E005,Dorothy Vaughan,15-Mar-2012,2024-02,130,yes,Engineering
+E006,  Mary Jackson  ,2016-04-01,2024-03, 100 , no ,Operations
+00042,Leading Zero,2021-01-01,2024-03,40,0,Ops
+E008,Margaret Hamilton,2014-07-01,2024-04,37.5,1,Engineering
+E009,=1+1,2022-01-01,2024-04,20,yes,Security
+E010,"@SUM(1,1)",2022-01-01,2024-04,22,yes,Security
+E011,+1+1,2022-01-01,2024-04,21,y,Security
+E012,Leap Day,2024-02-29,2024-04,10,false,Engineering
+E013,Zero Hours,2019-01-01,2024-05,0,no,Engineering
+E014,Max Hours,2019-01-01,2024-05,744,yes,Engineering
+ E015 ,Spaced ID,2019-01-01,2024-05,8,f,Engineering
+E016,Slash Date,2020/01/02,2024-06,12,yes,Engineering
+E017,Unpadded Date,1/2/2020,2024-06,12,yes,Engineering
+E018,Coverage Yes,2019-01-01,2024-06,150,YES,Engineering
+,Missing Id,2020-01-01,2024-07,100,yes,Engineering
+E020,,2020-01-01,2024-07,100,yes,Engineering
+E021,No Hire,,2024-07,100,yes,Engineering
+E022,No Month,2020-01-01,,100,yes,Engineering
+E023,No Hours,2020-01-01,2024-07,,yes,Engineering
+E024,No Coverage,2020-01-01,2024-07,100,,Engineering
+E025,Bad Date,March 5th 2024,2024-07,100,yes,Engineering
+E026,EU Date,13/01/2024,2024-07,100,yes,Engineering
+E027,Slash Month,2020-01-01,2024/07,100,yes,Engineering
+E028,Month 13,2020-01-01,2024-13,100,yes,Engineering
+E029,Month Compact,2020-01-01,202407,100,yes,Engineering
+E030,Hours Text,2020-01-01,2024-08,abc,yes,Engineering
+E031,Hours Negative,2020-01-01,2024-08,-4,yes,Engineering
+E032,Hours Absurd,2020-01-01,2024-08,800,yes,Engineering
+E033,Hours Comma,2020-01-01,2024-08,"1,200",yes,Engineering
+E034,Hours Sci,2020-01-01,2024-08,1e2,yes,Engineering
+E035,Coverage Maybe,2020-01-01,2024-08,100,maybe,Engineering
+E036,Coverage Word,2020-01-01,2024-08,100,offered,Engineering
+E037,Dup First,2020-01-01,2024-09,100,yes,Engineering
+E037,Dup Second,2020-01-01,2024-09,110,no,Engineering
+E039,Hired Later,2024-10-01,2024-09,100,yes,Engineering
+E040,Short Row,2020-01-01,2024-10,100
+E041,Blank Hours,2020-01-01,2024-10,   ,yes,Engineering
+E042,   ,2020-01-01,2024-10,10,yes,Engineering
+E043,Bad Day,02/31/2024,2024-10,10,yes,Engineering
+E044,Two Problems,2020-01-01,2024-11,nope,perhaps,QA
+,,,,,,
+E046,"Ann	Bell",2020-01-01,2024-11,10,yes,Engineering
+
+

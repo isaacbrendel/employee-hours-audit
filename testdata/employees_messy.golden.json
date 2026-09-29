@@ -1,0 +1,659 @@
+{
+  "clean": [
+    {
+      "row": 2,
+      "employee_id": "E001",
+      "name": "Ada Lovelace",
+      "hire_date": "2020-01-15",
+      "month": "2024-01",
+      "hours_worked": 160,
+      "coverage_offered": true,
+      "full_time": true,
+      "coverage_gap": false
+    },
+    {
+      "row": 3,
+      "employee_id": "E002",
+      "name": "Grace Hopper",
+      "hire_date": "2018-06-01",
+      "month": "2024-01",
+      "hours_worked": 140,
+      "coverage_offered": false,
+      "full_time": true,
+      "coverage_gap": true
+    },
+    {
+      "row": 4,
+      "employee_id": "E003",
+      "name": "Alan Turing, Jr.",
+      "hire_date": "2019-03-01",
+      "month": "2024-01",
+      "hours_worked": 80,
+      "coverage_offered": false,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 5,
+      "employee_id": "E004",
+      "name": "Katherine Johnson",
+      "hire_date": "2015-03-15",
+      "month": "2024-02",
+      "hours_worked": 129.5,
+      "coverage_offered": true,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 6,
+      "employee_id": "E005",
+      "name": "Dorothy Vaughan",
+      "hire_date": "2012-03-15",
+      "month": "2024-02",
+      "hours_worked": 130,
+      "coverage_offered": true,
+      "full_time": true,
+      "coverage_gap": false
+    },
+    {
+      "row": 7,
+      "employee_id": "E006",
+      "name": "Mary Jackson",
+      "hire_date": "2016-04-01",
+      "month": "2024-03",
+      "hours_worked": 100,
+      "coverage_offered": false,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 8,
+      "employee_id": "00042",
+      "name": "Leading Zero",
+      "hire_date": "2021-01-01",
+      "month": "2024-03",
+      "hours_worked": 40,
+      "coverage_offered": false,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 9,
+      "employee_id": "E008",
+      "name": "Margaret Hamilton",
+      "hire_date": "2014-07-01",
+      "month": "2024-04",
+      "hours_worked": 37.5,
+      "coverage_offered": true,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 10,
+      "employee_id": "E009",
+      "name": "=1+1",
+      "hire_date": "2022-01-01",
+      "month": "2024-04",
+      "hours_worked": 20,
+      "coverage_offered": true,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 11,
+      "employee_id": "E010",
+      "name": "@SUM(1,1)",
+      "hire_date": "2022-01-01",
+      "month": "2024-04",
+      "hours_worked": 22,
+      "coverage_offered": true,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 12,
+      "employee_id": "E011",
+      "name": "+1+1",
+      "hire_date": "2022-01-01",
+      "month": "2024-04",
+      "hours_worked": 21,
+      "coverage_offered": true,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 13,
+      "employee_id": "E012",
+      "name": "Leap Day",
+      "hire_date": "2024-02-29",
+      "month": "2024-04",
+      "hours_worked": 10,
+      "coverage_offered": false,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 14,
+      "employee_id": "E013",
+      "name": "Zero Hours",
+      "hire_date": "2019-01-01",
+      "month": "2024-05",
+      "hours_worked": 0,
+      "coverage_offered": false,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 15,
+      "employee_id": "E014",
+      "name": "Max Hours",
+      "hire_date": "2019-01-01",
+      "month": "2024-05",
+      "hours_worked": 744,
+      "coverage_offered": true,
+      "full_time": true,
+      "coverage_gap": false
+    },
+    {
+      "row": 16,
+      "employee_id": "E015",
+      "name": "Spaced ID",
+      "hire_date": "2019-01-01",
+      "month": "2024-05",
+      "hours_worked": 8,
+      "coverage_offered": false,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 17,
+      "employee_id": "E016",
+      "name": "Slash Date",
+      "hire_date": "2020-01-02",
+      "month": "2024-06",
+      "hours_worked": 12,
+      "coverage_offered": true,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 18,
+      "employee_id": "E017",
+      "name": "Unpadded Date",
+      "hire_date": "2020-01-02",
+      "month": "2024-06",
+      "hours_worked": 12,
+      "coverage_offered": true,
+      "full_time": false,
+      "coverage_gap": false
+    },
+    {
+      "row": 19,
+      "employee_id": "E018",
+      "name": "Coverage Yes",
+      "hire_date": "2019-01-01",
+      "month": "2024-06",
+      "hours_worked": 150,
+      "coverage_offered": true,
+      "full_time": true,
+      "coverage_gap": false
+    }
+  ],
+  "exceptions": [
+    {
+      "row": 20,
+      "field": "employee_id",
+      "reason": "employee_id is required",
+      "raw": {
+        "employee_id": "",
+        "name": "Missing Id",
+        "hire_date": "2020-01-01",
+        "month": "2024-07",
+        "hours_worked": "100",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 21,
+      "field": "name",
+      "reason": "name is required",
+      "raw": {
+        "employee_id": "E020",
+        "name": "",
+        "hire_date": "2020-01-01",
+        "month": "2024-07",
+        "hours_worked": "100",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 22,
+      "field": "hire_date",
+      "reason": "hire_date is required",
+      "raw": {
+        "employee_id": "E021",
+        "name": "No Hire",
+        "hire_date": "",
+        "month": "2024-07",
+        "hours_worked": "100",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 23,
+      "field": "month",
+      "reason": "month is required",
+      "raw": {
+        "employee_id": "E022",
+        "name": "No Month",
+        "hire_date": "2020-01-01",
+        "month": "",
+        "hours_worked": "100",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 24,
+      "field": "hours_worked",
+      "reason": "hours_worked is required",
+      "raw": {
+        "employee_id": "E023",
+        "name": "No Hours",
+        "hire_date": "2020-01-01",
+        "month": "2024-07",
+        "hours_worked": "",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 25,
+      "field": "coverage_offered",
+      "reason": "coverage_offered is required",
+      "raw": {
+        "employee_id": "E024",
+        "name": "No Coverage",
+        "hire_date": "2020-01-01",
+        "month": "2024-07",
+        "hours_worked": "100",
+        "coverage_offered": ""
+      }
+    },
+    {
+      "row": 26,
+      "field": "hire_date",
+      "reason": "hire date \"March 5th 2024\" is not an accepted format (YYYY-MM-DD, YYYY/MM/DD, MM/DD/YYYY, M/D/YYYY, or DD-Mon-YYYY)",
+      "raw": {
+        "employee_id": "E025",
+        "name": "Bad Date",
+        "hire_date": "March 5th 2024",
+        "month": "2024-07",
+        "hours_worked": "100",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 27,
+      "field": "hire_date",
+      "reason": "hire date \"13/01/2024\" is not an accepted format (YYYY-MM-DD, YYYY/MM/DD, MM/DD/YYYY, M/D/YYYY, or DD-Mon-YYYY)",
+      "raw": {
+        "employee_id": "E026",
+        "name": "EU Date",
+        "hire_date": "13/01/2024",
+        "month": "2024-07",
+        "hours_worked": "100",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 28,
+      "field": "month",
+      "reason": "month \"2024/07\" must be YYYY-MM",
+      "raw": {
+        "employee_id": "E027",
+        "name": "Slash Month",
+        "hire_date": "2020-01-01",
+        "month": "2024/07",
+        "hours_worked": "100",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 29,
+      "field": "month",
+      "reason": "month \"2024-13\" must be YYYY-MM",
+      "raw": {
+        "employee_id": "E028",
+        "name": "Month 13",
+        "hire_date": "2020-01-01",
+        "month": "2024-13",
+        "hours_worked": "100",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 30,
+      "field": "month",
+      "reason": "month \"202407\" must be YYYY-MM",
+      "raw": {
+        "employee_id": "E029",
+        "name": "Month Compact",
+        "hire_date": "2020-01-01",
+        "month": "202407",
+        "hours_worked": "100",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 31,
+      "field": "hours_worked",
+      "reason": "hours \"abc\" must be a plain decimal number such as 160 or 37.5",
+      "raw": {
+        "employee_id": "E030",
+        "name": "Hours Text",
+        "hire_date": "2020-01-01",
+        "month": "2024-08",
+        "hours_worked": "abc",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 32,
+      "field": "hours_worked",
+      "reason": "hours cannot be negative (-4)",
+      "raw": {
+        "employee_id": "E031",
+        "name": "Hours Negative",
+        "hire_date": "2020-01-01",
+        "month": "2024-08",
+        "hours_worked": "-4",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 33,
+      "field": "hours_worked",
+      "reason": "hours 800 are above 744, the number of hours in a 31-day month, so the value was not capped or rounded",
+      "raw": {
+        "employee_id": "E032",
+        "name": "Hours Absurd",
+        "hire_date": "2020-01-01",
+        "month": "2024-08",
+        "hours_worked": "800",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 34,
+      "field": "hours_worked",
+      "reason": "hours \"1,200\" must be a plain decimal number such as 160 or 37.5",
+      "raw": {
+        "employee_id": "E033",
+        "name": "Hours Comma",
+        "hire_date": "2020-01-01",
+        "month": "2024-08",
+        "hours_worked": "1,200",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 35,
+      "field": "hours_worked",
+      "reason": "hours \"1e2\" must be a plain decimal number such as 160 or 37.5",
+      "raw": {
+        "employee_id": "E034",
+        "name": "Hours Sci",
+        "hire_date": "2020-01-01",
+        "month": "2024-08",
+        "hours_worked": "1e2",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 36,
+      "field": "coverage_offered",
+      "reason": "coverage \"maybe\" must be yes or no (also accepted: true/false, y/n, 1/0)",
+      "raw": {
+        "employee_id": "E035",
+        "name": "Coverage Maybe",
+        "hire_date": "2020-01-01",
+        "month": "2024-08",
+        "hours_worked": "100",
+        "coverage_offered": "maybe"
+      }
+    },
+    {
+      "row": 37,
+      "field": "coverage_offered",
+      "reason": "coverage \"offered\" must be yes or no (also accepted: true/false, y/n, 1/0)",
+      "raw": {
+        "employee_id": "E036",
+        "name": "Coverage Word",
+        "hire_date": "2020-01-01",
+        "month": "2024-08",
+        "hours_worked": "100",
+        "coverage_offered": "offered"
+      }
+    },
+    {
+      "row": 38,
+      "field": "employee_id",
+      "reason": "employee E037 is also reported for 2024-09 on row 39. This row was held so a person can choose which record to keep",
+      "raw": {
+        "employee_id": "E037",
+        "name": "Dup First",
+        "hire_date": "2020-01-01",
+        "month": "2024-09",
+        "hours_worked": "100",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 39,
+      "field": "employee_id",
+      "reason": "employee E037 is also reported for 2024-09 on row 38. This row was held so a person can choose which record to keep",
+      "raw": {
+        "employee_id": "E037",
+        "name": "Dup Second",
+        "hire_date": "2020-01-01",
+        "month": "2024-09",
+        "hours_worked": "110",
+        "coverage_offered": "no"
+      }
+    },
+    {
+      "row": 40,
+      "field": "hire_date",
+      "reason": "hire date 2024-10-01 is after the reported month 2024-09",
+      "raw": {
+        "employee_id": "E039",
+        "name": "Hired Later",
+        "hire_date": "2024-10-01",
+        "month": "2024-09",
+        "hours_worked": "100",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 41,
+      "field": "row",
+      "reason": "this row has 5 columns and the header has 7, so the columns were not mapped",
+      "raw": {
+        "employee_id": "E040",
+        "name": "Short Row",
+        "hire_date": "2020-01-01",
+        "month": "2024-10",
+        "hours_worked": "100",
+        "coverage_offered": ""
+      }
+    },
+    {
+      "row": 42,
+      "field": "hours_worked",
+      "reason": "hours_worked is required",
+      "raw": {
+        "employee_id": "E041",
+        "name": "Blank Hours",
+        "hire_date": "2020-01-01",
+        "month": "2024-10",
+        "hours_worked": "",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 43,
+      "field": "name",
+      "reason": "name is required",
+      "raw": {
+        "employee_id": "E042",
+        "name": "",
+        "hire_date": "2020-01-01",
+        "month": "2024-10",
+        "hours_worked": "10",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 44,
+      "field": "hire_date",
+      "reason": "hire date \"02/31/2024\" is not an accepted format (YYYY-MM-DD, YYYY/MM/DD, MM/DD/YYYY, M/D/YYYY, or DD-Mon-YYYY)",
+      "raw": {
+        "employee_id": "E043",
+        "name": "Bad Day",
+        "hire_date": "02/31/2024",
+        "month": "2024-10",
+        "hours_worked": "10",
+        "coverage_offered": "yes"
+      }
+    },
+    {
+      "row": 45,
+      "field": "coverage_offered",
+      "reason": "coverage \"perhaps\" must be yes or no (also accepted: true/false, y/n, 1/0)",
+      "raw": {
+        "employee_id": "E044",
+        "name": "Two Problems",
+        "hire_date": "2020-01-01",
+        "month": "2024-11",
+        "hours_worked": "nope",
+        "coverage_offered": "perhaps"
+      }
+    },
+    {
+      "row": 45,
+      "field": "hours_worked",
+      "reason": "hours \"nope\" must be a plain decimal number such as 160 or 37.5",
+      "raw": {
+        "employee_id": "E044",
+        "name": "Two Problems",
+        "hire_date": "2020-01-01",
+        "month": "2024-11",
+        "hours_worked": "nope",
+        "coverage_offered": "perhaps"
+      }
+    },
+    {
+      "row": 46,
+      "field": "coverage_offered",
+      "reason": "coverage_offered is required",
+      "raw": {
+        "employee_id": "",
+        "name": "",
+        "hire_date": "",
+        "month": "",
+        "hours_worked": "",
+        "coverage_offered": ""
+      }
+    },
+    {
+      "row": 46,
+      "field": "employee_id",
+      "reason": "employee_id is required",
+      "raw": {
+        "employee_id": "",
+        "name": "",
+        "hire_date": "",
+        "month": "",
+        "hours_worked": "",
+        "coverage_offered": ""
+      }
+    },
+    {
+      "row": 46,
+      "field": "hire_date",
+      "reason": "hire_date is required",
+      "raw": {
+        "employee_id": "",
+        "name": "",
+        "hire_date": "",
+        "month": "",
+        "hours_worked": "",
+        "coverage_offered": ""
+      }
+    },
+    {
+      "row": 46,
+      "field": "hours_worked",
+      "reason": "hours_worked is required",
+      "raw": {
+        "employee_id": "",
+        "name": "",
+        "hire_date": "",
+        "month": "",
+        "hours_worked": "",
+        "coverage_offered": ""
+      }
+    },
+    {
+      "row": 46,
+      "field": "month",
+      "reason": "month is required",
+      "raw": {
+        "employee_id": "",
+        "name": "",
+        "hire_date": "",
+        "month": "",
+        "hours_worked": "",
+        "coverage_offered": ""
+      }
+    },
+    {
+      "row": 46,
+      "field": "name",
+      "reason": "name is required",
+      "raw": {
+        "employee_id": "",
+        "name": "",
+        "hire_date": "",
+        "month": "",
+        "hours_worked": "",
+        "coverage_offered": ""
+      }
+    },
+    {
+      "row": 47,
+      "field": "name",
+      "reason": "name contains a control character (a line break or a tab, for example)",
+      "raw": {
+        "employee_id": "E046",
+        "name": "Ann\tBell",
+        "hire_date": "2020-01-01",
+        "month": "2024-11",
+        "hours_worked": "10",
+        "coverage_offered": "yes"
+      }
+    }
+  ],
+  "summary": {
+    "input_rows": 46,
+    "clean_rows": 18,
+    "exception_count": 34,
+    "rows_with_errors": 28,
+    "full_time_months": 5,
+    "part_time_months": 13,
+    "coverage_gaps": 1,
+    "total_hours": 1816
+  },
+  "warnings": [
+    "ignored extra column \"Department\""
+  ]
+}
