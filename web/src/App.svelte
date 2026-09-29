@@ -133,7 +133,7 @@
   </header>
 
   <ol class="steps">
-    <li><button type="button" aria-current={stage === "upload" ? "step" : undefined} onclick={() => (stage = "upload")}>1 Upload</button></li>
+    <li><button type="button" aria-current={stage === "upload" ? "step" : undefined} onclick={() => { if (stage !== "upload") { chosen = null; stage = "upload"; } }}>1 Upload</button></li>
     <li><button type="button" aria-current={stage === "review" ? "step" : undefined} onclick={() => result && (stage = "review")} disabled={!result}>2 Review</button></li>
     <li><button type="button" aria-current={stage === "export" ? "step" : undefined} onclick={() => result && (stage = "export")} disabled={!result}>3 Export</button></li>
   </ol>
@@ -179,6 +179,11 @@
       {#each result.warnings as warning (warning)}
         <p class="warning">{warning}</p>
       {/each}
+      <p class="lede">Fix a row in the table, then recheck it. Continue to export when you want the workbook, including rows still in review.</p>
+      <div class="actions">
+        <button type="button" onclick={recheck} disabled={busy || review.length === 0}>Recheck rows</button>
+        <button type="button" class="secondary" onclick={() => (stage = "export")}>Continue to export</button>
+      </div>
 
       {#if review.length === 0}
         <p>Every row passed. Nothing is waiting for review.</p>
@@ -193,11 +198,6 @@
           onDismiss={() => (suggestion = null)}
         />
       {/if}
-
-      <div class="actions">
-        <button type="button" onclick={recheck} disabled={busy || review.length === 0}>Recheck rows</button>
-        <button type="button" class="secondary" onclick={() => (stage = "export")}>Continue to export</button>
-      </div>
 
       <h2 class="subhead">Clean data</h2>
       <p class="lede">These rows passed. A full-time month with no coverage stays here and is marked as a gap. It is not dropped.</p>

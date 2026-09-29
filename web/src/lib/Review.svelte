@@ -28,7 +28,10 @@
 
 <div class="scroll">
   <table>
-    <caption class="lede">Edit a row, then recheck it. A suggestion is not applied until you use the value and recheck.</caption>
+    <caption class="lede">
+      Edit a row, then recheck it. It moves to clean data only when it passes.
+      {#if suggestEnabled}A suggestion is not applied until you use the value and recheck.{/if}
+    </caption>
     <thead>
       <tr>
         <th scope="col">Row</th>

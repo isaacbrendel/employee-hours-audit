@@ -1,0 +1,12 @@
+.git
+web/node_modules
+web/dist
+docs
+testdata
+*.xlsx
+.env
+.env.*
+!.env.example
+WALKTHROUGH.md
+coverage.out
+*.cover
