@@ -13,13 +13,14 @@ import (
 	"time"
 
 	"github.com/isaacbrendel/employee-hours-audit/internal/api"
+	"github.com/isaacbrendel/employee-hours-audit/internal/suggest"
 )
 
 func main() {
 	static := uiDir("web/dist")
 	server := &http.Server{
 		Addr:              listenAddr(),
-		Handler:           (&api.Server{Static: static}).Handler(),
+		Handler:           (&api.Server{Suggest: suggest.FromEnv(), Static: static}).Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      30 * time.Second,
