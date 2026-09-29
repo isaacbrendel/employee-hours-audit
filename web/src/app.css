@@ -1,0 +1,249 @@
+:root {
+  color: #1c2430;
+  background: #f3efe6;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  background: #1c2430;
+  color: #f7f4ee;
+  border: 0;
+  border-radius: 4px;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background: transparent;
+  color: #1c2430;
+  border: 1px solid #c9bfb0;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #8f3d1b;
+  outline-offset: 2px;
+}
+
+.shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+  border-bottom: 1px solid #d9d0c3;
+  padding-bottom: 0.8rem;
+}
+
+header h1 {
+  font-size: 1.7rem;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+header p,
+.lede {
+  margin: 0.2rem 0 0;
+  color: #5c6570;
+  max-width: 42rem;
+}
+
+.steps {
+  display: flex;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 1rem 0 0;
+  margin: 0;
+}
+
+.steps button {
+  background: transparent;
+  color: #5c6570;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 0.35rem 0.2rem;
+}
+
+.steps button[aria-current="step"] {
+  color: #1c2430;
+  border-bottom-color: #8f3d1b;
+}
+
+.panel {
+  background: #fffdf8;
+  border: 1px solid #e3d9cc;
+  border-radius: 8px;
+  padding: 1rem 1rem 1.2rem;
+  margin-top: 1rem;
+}
+
+.counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.6rem;
+  margin: 1rem 0;
+}
+
+.counts div {
+  border-top: 2px solid #1c2430;
+  padding-top: 0.35rem;
+}
+
+.counts dt {
+  color: #5c6570;
+  font-size: 0.82rem;
+}
+
+.counts dd {
+  margin: 0.15rem 0 0;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.4rem;
+}
+
+.file input {
+  display: block;
+  margin-top: 0.35rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.status,
+.warning,
+.error {
+  margin: 0.8rem 0 0;
+}
+
+.warning {
+  color: #6b4a12;
+}
+
+.error {
+  color: #8f1d1d;
+}
+
+.scroll {
+  overflow-x: auto;
+  margin-top: 0.6rem;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 720px;
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.4rem 0.35rem;
+  border-bottom: 1px solid #eadfcf;
+}
+
+th {
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #5c6570;
+  font-weight: 650;
+}
+
+input[type="text"] {
+  width: 100%;
+  min-width: 6rem;
+  border: 1px solid #cfc4b4;
+  border-radius: 4px;
+  background: #fff;
+  padding: 0.35rem 0.4rem;
+}
+
+.issues {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #6d2c16;
+}
+
+.issues li {
+  margin: 0.2rem 0;
+}
+
+.suggest {
+  margin-top: 0.35rem;
+}
+
+.suggest button {
+  background: transparent;
+  color: #8f3d1b;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.suggestion {
+  margin-top: 0.35rem;
+  background: #f6efe4;
+  padding: 0.45rem 0.55rem;
+  border-radius: 4px;
+}
+
+.suggestion p {
+  margin: 0 0 0.35rem;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0 0.4rem;
+  margin-left: 0.25rem;
+}
+
+.tag.full {
+  color: #1d6b45;
+}
+
+.tag.gap {
+  color: #8f3d1b;
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.subhead {
+  margin-top: 1.4rem;
+}
