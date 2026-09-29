@@ -1,0 +1,25 @@
+# dependencies and build output
+node_modules/
+dist/
+web/dist/
+cmd/server/dist/
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# generated workbooks and coverage artifacts
+*.xlsx
+coverage.out
+*.cover
+
+# fuzz cache. Seed inputs live in the test source.
+testdata/fuzz/
+
+# local interview notes, not part of the published project
+WALKTHROUGH.md
+
+.DS_Store
+.idea/
+.vscode/

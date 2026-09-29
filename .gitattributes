@@ -1,0 +1,2 @@
+# Keep the planted BOM and CRLF exactly as authored.
+testdata/employees_messy.csv -text
