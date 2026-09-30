@@ -6,7 +6,7 @@ A Go service reads a messy monthly-hours CSV, keeps every bad row for review wit
 
 It is a demo, not tax, legal, or ACA filing advice, and it does not produce Form 1094-C or Form 1095-C.
 
-This is Option C, a Go API and a Svelte front end, also covering the CSV cleanup and Excel reporting from Options B and D.
+This is Option C, also covering B and D: a Go API and a Svelte front end, plus the CSV cleanup and the Excel reporting.
 
 ![Upload screen](docs/screenshots/01-upload.png)
 
@@ -44,7 +44,7 @@ Left out on purpose: Form 1095-C codes, affordability, penalty amounts, a databa
 
 ## Tests
 
-`go vet ./...` was clean. `go test ./... -race -cover` passed. `internal/record` was 93.6% of statements. The module was 79.1%. `FuzzParse` passed a 60-second run, 1,926,987 executions. Vitest passed 6 tests. Planted rows are listed in [testdata/README.md](testdata/README.md). Command output is in [docs/test-results.md](docs/test-results.md).
+`go vet ./...` was clean. `go test ./... -race -cover` passed on Go 1.27.1. `internal/record` was 94.0% of statements. The module was 79.7%. `FuzzParse` passed a 60-second run, 1,926,987 executions. Vitest passed 6 tests. Planted rows are listed in [testdata/README.md](testdata/README.md). The earlier full log, on Go 1.26.5, is in [docs/test-results.md](docs/test-results.md) (record 93.6%, module 79.1%).
 
 Manual check: upload `testdata/employees_messy.csv` (46 submitted, 18 clean, 28 in review), set row 45 to hours `40` and coverage `yes`, recheck, and download the workbook.
 
