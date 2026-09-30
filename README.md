@@ -1,6 +1,8 @@
 # Employee hours audit
 
-Live demo: [employee-hours-audit.fly.dev](https://employee-hours-audit.fly.dev/) (upload testdata/employees_messy.csv to try it).
+Live demo: https://employee-hours-audit.fly.dev/
+
+Upload `testdata/employees_messy.csv` to try it.
 
 A Go service reads a messy monthly-hours CSV, keeps every bad row for review with a reason, and writes an Excel workbook whose counts are formulas. The Svelte page is where a person fixes a row and checks it again.
 
