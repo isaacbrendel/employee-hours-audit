@@ -50,4 +50,4 @@ Left out on purpose: Form 1095-C codes, affordability, penalty amounts, a databa
 
 Manual check: upload `testdata/employees_messy.csv` (46 submitted, 18 clean, 28 in review), set row 45 to hours `40` and coverage `yes`, recheck, and download the workbook.
 
-An agent wrote most of this. It was wrong where the flag parser ignored `-o` after the filename, where a pivot range quoted the sheet name itself, and where a catch-all `GET /` handled API routes. Those are fixed and tested. I would not let an agent choose which duplicate to keep, or apply a suggested value by itself.
+The service does not choose which duplicate to keep. Suggested values are never applied unless a person accepts them.
