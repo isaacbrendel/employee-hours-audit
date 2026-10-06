@@ -1,352 +1,295 @@
-# Interview prep: talk for 15+ minutes (plain English)
+# How I built the employee hours audit (study notes)
 
-This is a spoken outline for Blake’s call. Read it out loud once. Aim for **~15 minutes** on the coding project, then let AI verification take another few minutes if he asks, or fold it in as you go.
+Read this like a blog post. The goal is that you understand the project well enough to explain it in **your** words—not to memorize a script.
 
 Live demo: https://employee-hours-audit.fly.dev/  
-Sample file: `testdata/employees_messy.csv`
+Sample file: `testdata/employees_messy.csv` (expect about **46** rows in, **18** clean, **28** needing review)
 
 ---
 
-# Part A — The coding project (about 12–15 minutes)
+## What this project is
 
-## A1. Open with what it is (about 1 minute)
+I built a small tool that takes a messy monthly employee-hours CSV and helps a person clean it.
 
-**Say something like:**
+It does three things:
 
-> I built a small employee-hours audit tool for messy monthly payroll CSVs.
->
-> You upload a CSV of hours and coverage. The tool does not silently fix or drop bad rows. It splits the file into two buckets: rows a person can trust, and rows a person has to review, each with a plain-English reason.
->
-> From there you can edit the bad rows in the browser, recheck them through the same rules, and download an Excel workbook. The important counts in that workbook are Excel formulas that read the data sheets—not numbers I pasted in from the server.
->
-> It’s a demo for ACAPrime-style data cleanup work. It is not tax advice and it does not file Form 1094-C or 1095-C.
+1. **Reads** the file and decides which rows look trustworthy and which ones a person has to look at.
+2. **Lets a person fix** the bad rows in a web UI, then runs the same checks again.
+3. **Exports an Excel workbook** with clean data, a list of problems, and summary counts. Those summary counts are Excel *formulas* that read the data sheets—not numbers the server pasted in and hoped nobody would question.
 
-**If they ask “which option?”:** Option C on the brief—Go API + Svelte UI—also covering the CSV cleanup (B) and Excel reporting (D).
+The stack is Go on the backend (CLI + HTTP API) and Svelte on the front end. That was Option C on the assignment, and it also covers the CSV cleanup and Excel reporting pieces.
+
+Important honesty up front: this is a **demo**. It is not tax advice, not legal advice, and it does not produce Form 1094-C or Form 1095-C. ACAPrime’s real work is much bigger. This project is a slice of the “messy payroll data in → something a reviewer can defend” problem.
 
 ---
 
-## A2. Why this problem exists (about 2 minutes)
+## Why the problem looks like this
 
-**Plain English business context:**
+Companies that do ACA reporting often get hours data out of payroll systems as CSVs and spreadsheets. Those files are rarely clean. You get:
 
-ACAPrime / ChannelBound helps employers with Affordable Care Act reporting. In the real world, hours data often comes out of payroll systems as spreadsheets and CSVs that are ugly: wrong dates, blank IDs, “maybe” instead of yes/no, two rows for the same person in the same month, names that look like Excel formulas, extra columns nobody asked for.
+- blank employee IDs
+- dates written five different ways
+- hours like `abc`, `1,200`, or `1e2`
+- coverage written as `maybe` instead of yes/no
+- two rows for the same person in the same month
+- names that start with `=` and look like Excel formulas
+- extra columns nobody asked for
 
-Someone has to clean that before anything official happens. If software “helpfully” guesses—keeps the first duplicate, caps 800 hours down to 744, rewrites `13/01/2024` as January 13—you can hide the exact rows a human reviewer needed to see.
+If software quietly “fixes” those things—keeps the first duplicate, caps weird hours, guesses what a date meant—it can hide the exact rows a human needed to see. For compliance-ish data, a wrong automatic answer is worse than an honest “this needs a person.”
 
-So the product pitch is: **parse honestly, hold everything unclear, let a person decide, then export something auditable.**
+So the product idea is simple:
 
-**The one ACA fact the tool actually uses:**
+> Parse carefully. Hold anything unclear. Let a human decide. Export something auditable.
 
-The IRS says that under the *monthly measurement method*, someone with at least **130 hours of service in a calendar month** counts as full-time for that month (30 hours/week × ~4⅓ weeks).
+---
 
-I implemented that flag only. I did **not** implement:
+## The one ACA rule I actually used
 
-- look-back measurement (measure hours in an earlier period, freeze status later)
-- affordability tests
+Under the IRS **monthly measurement method**, an employee with at least **130 hours of service in a calendar month** is full-time for that month. That is roughly 30 hours a week.
+
+My tool flags full-time that way. If someone is full-time and coverage is `no`, I also flag a **coverage gap**. That flag is a review aid. It is **not** me saying the employer owes a penalty. I do not have enough columns (affordability, dependents, limited non-assessment periods, and so on) to make that call.
+
+I deliberately did **not** build:
+
+- look-back measurement (measure hours in an earlier window, lock status later)
 - Form 1095-C line codes
-- penalty math under 4980H
+- affordability tests
+- penalty math
 
-**Why leave those out?** The input columns don’t support them. Making up a “looks official” answer would be worse than saying “out of scope.” A full-time month with coverage = no is flagged as a *coverage gap* for the reviewer—it is not a determination that the employer owes a penalty.
+If someone asks why, the honest answer is: inventing official-looking answers from incomplete inputs would be more dangerous than leaving them out and saying so.
 
 ---
 
-## A3. Walk the life of one file (about 3–4 minutes)
+## What happens to a file, start to finish
 
-Talk through this as a story. Use the planted fixture numbers: **46 rows in, 18 clean, 28 in review**.
+### 1. Reading the CSV
 
-### Step 1 — Upload / CLI read
+Same core logic whether you use the CLI or the website.
 
-Same core logic for CLI and web.
+- Read the file (with a size/row cap so a huge upload cannot take the process down).
+- Strip a UTF-8 BOM if Excel stuck one on the front.
+- Reject the whole file if it is not valid UTF-8. Mojibake that “almost works” is worse than a clear error.
+- Parse with Go’s `encoding/csv`, not a homemade split-on-commas. Real files have quoted commas in names, Windows line endings, and blank lines.
 
-1. Read the whole file into memory (demo-sized; also capped).
-2. Strip a UTF-8 BOM if present (Excel loves writing those).
-3. Reject non-UTF-8 entirely—better a hard error than mojibake that looks “almost right.”
-4. Use Go’s `encoding/csv`, not a hand-rolled split on commas. Quoted commas in names, CRLF line endings, blank lines—those are real.
+**Headers:** I normalize names (trim, lowercase, spaces → underscores) so `Employee_ID`, `NAME`, and `Hours Worked` all map. Required columns must exist or the file fails. An extra column like `Department` becomes a warning and is ignored for the audit—not copied into clean data, and not a reason to reject the whole file.
 
-**Header mapping in plain English:**  
-Column names are trimmed, lowercased, spaces become underscores. So `Employee_ID`, `NAME`, and `Hours Worked` all map. Missing required columns fail the whole file. An extra column like `Department` becomes a **warning**, not a crash—and that column is not copied into clean data.
+**Row numbers:** Physical line numbers. Header is line 1. Blank lines are not records, so trailing blank lines do not create fake errors.
 
-**Row numbers:** Physical line numbers. Header is line 1, first data row is line 2. Blank lines are not records, so trailing blank lines don’t invent fake exceptions.
+**Broken structure:**
 
-**Broken rows:**
+- Wrong number of columns → that row is held for review. I do **not** slide fields sideways into the next person’s data.
+- A broken quote (unclosed `"`) → stop the file. After that, the bytes are no longer aligned; continuing would invent garbage rows.
 
-- Wrong column count → hold that row; do **not** slide fields left/right into the next person’s data.
-- Broken quote (unclosed `"`) → stop the file. Continuing would invent garbage rows from misaligned bytes.
+### 2. Validating each row
 
-### Step 2 — Validate each row
+Every field has a rule. Failures become **exceptions**: which row, which field, why, and the raw values. One row can have several exceptions so a person can fix everything in one pass.
 
-Each field has a rule. Failures become **exceptions**: `{ row, field, reason, raw values }`. One row can have several exceptions (e.g. bad hours *and* bad coverage) so the reviewer can fix everything in one pass.
+Clean rows get normalized (hire date to `YYYY-MM-DD`, hours to a number, coverage to true/false) and two derived flags: full-time and coverage gap.
 
-Examples you can name from the fixture:
+Concrete examples from the sample file that are good to remember:
 
-| What showed up | What we do |
+| Messy input | What happens |
 | --- | --- |
-| Empty employee id | Hold: id required |
-| Hire date `March 5th 2024` | Hold: not in the accepted date list |
-| `13/01/2024` | Hold: slash dates are month/day/year; we do **not** reread as 13 January |
-| Hours `abc`, `-4`, `1,200`, `1e2`, `800` | Hold; we don’t guess or cap |
-| Coverage `maybe` / `offered` | Hold; only yes/no-style tokens |
-| Hired in October for a September month | Hold: hire after reported month |
-| Name `=1+1` | Allowed as data—but Excel export must store it as text, not a formula |
-| Two rows for same employee + month | **Both** held; we don’t pick a winner |
+| Missing employee ID | Held for review |
+| Hire date `March 5th 2024` | Held—not in the accepted date list |
+| `13/01/2024` | Held—slash dates are month/day/year; I do not reinterpret as 13 January |
+| Hours `abc`, `-4`, `1,200`, `800` | Held—I do not guess or silently cap |
+| Coverage `maybe` | Held—only clear yes/no-style values |
+| Two rows for the same employee + month | **Both** held—I do not pick a winner |
+| Name `=1+1` | Allowed as data; Excel export must store it as text, not a live formula |
 
-**Clean rows** get normalized: hire date to `YYYY-MM-DD`, hours to a number, coverage to true/false, plus two derived flags:
+### 3. Review in the browser
 
-- `full_time` = hours ≥ 130  
-- `coverage_gap` = full-time AND coverage false  
+The UI has three steps: Upload → Review → Export.
 
-Again: coverage gap stays on the clean sheet as a flag. A truthful “no” is information.
+You edit bad rows in the browser. When you hit **Recheck**, the browser sends the whole working set back to Go and runs the **same** validation. The front end does not reimplement the rules. That matters: one definition of “valid,” everywhere.
 
-### Step 3 — Review in the browser
+If an Anthropic API key is configured, you can ask for a suggested fix. Using the suggestion only fills the field. The row stays in review until you recheck. No key → suggestions are off.
 
-Three stages: Upload → Review → Export.
+### 4. Excel export
 
-- Review groups exceptions by row so you see one person/row with a list of problems.
-- You edit the raw fields.
-- **Recheck** sends the whole working set (clean rows + edited review rows) back through the **same** Go validation. The browser does not reimplement the rules.
-- Status text explains movement: e.g. “Row 45 moved to clean data. 27 rows are still in review.”
+The workbook has Summary, Clean Data, Exceptions, and a Pivot sheet.
 
-Optional: if `ANTHROPIC_API_KEY` is set, a “Suggest a fix” button can propose a value. Using it only fills the input. The row stays in review until you recheck. No key → suggest is hidden / 404.
+- Clean Data and Exceptions hold the rows.
+- Most Summary metrics are formulas (`COUNTIF`, `SUM`, etc.) pointed at those sheets.
+- “Rows submitted” is the one typed number, because source rows and exception *lines* are not one-to-one (one bad row can produce multiple exception items).
+- Full-time and coverage-gap columns on Clean Data are formulas too, so Excel recalculates them.
+- Text that looks like a formula (`=`, `+`, `-`, `@`, …) gets a leading quote so spreadsheet apps treat it as text.
+- There is a clear disclaimer on Summary: demo only, not a filing.
 
-### Step 4 — Excel workbook
-
-Sheets: **Summary**, **Clean Data**, **Exceptions**, **Pivot**.
-
-- Clean and Exceptions are the data.
-- Summary counts (clean rows, full-time months, coverage gaps, total hours, exception items) are **formulas** like `COUNTIF` / `SUM` against those sheets.
-- “Rows submitted” is the one typed number, because source rows and exception *items* are not 1:1 (one row can produce multiple exception lines; blank lines aren’t rows).
-- Full-time and coverage-gap columns on Clean Data are formulas too (`=E2>=130`, etc.), so Excel recomputes them.
-- Any text that starts with `=`, `+`, `-`, `@`, tab, etc. gets a leading `'` so spreadsheet apps treat it as text (OWASP CSV-injection idea, applied to xlsx cells).
-- Pivot of hours by month is a convenience; the formulas are what I’d defend in review.
-- Big disclaimer on Summary: demo only, not filing advice.
-
-CLI does the same write path: `audit file.csv -o report.xlsx`, exit 0 even when some rows need review.
+The CLI writes the same kind of workbook: `audit file.csv -o report.xlsx`. Exit code 0 means “I wrote a workbook,” even if some rows still need review. Exit 1 is a read/parse failure. Exit 2 is bad usage.
 
 ---
 
-## A4. Design decisions — defend them like a conversation (about 4–5 minutes)
+## Design decisions (the ones worth defending in an interview)
 
-Don’t list them like a README. Tell them as **judgment calls**.
+These are the topics a CTO is likely to push on. For each one: what I chose, why, what I traded away, and what you might get asked.
 
-### “I refuse to guess”
+### 1. Ambiguous data fails closed — a person decides
 
-**Duplicates:** If E037 appears twice for 2024-09, both rows go to review. Keeping the first is a silent policy decision the employer didn’t authorize. The reason string literally says a person should choose which record to keep.
+**Choice:** When the tool is unsure (duplicates, weird hours, ambiguous dates, unclear coverage), it holds the row. It does not auto-repair.
 
-**Dates:** Five accepted layouts only. Slash dates are US MDY. `02/31/2024` is rejected (we require the value to round-trip through the layout that parsed it—so Go can’t quietly roll it to March). Ambiguous international dates are failures, not cleverness.
+**Why:** This is compliance-adjacent data. Silent fixes create silent liability. Showing the conflict preserves evidence.
 
-**Hours:** Must look like a plain decimal (`160`, `37.5`). Thousands separators and scientific notation fail. Above 744 fails—we don’t cap. Zero hours is valid (reported zero ≠ missing).
+**Tradeoff:** More review work for the human. That is intentional for a cleanup tool.
 
-**Coverage:** Small synonym set (yes/no, true/false, y/n, 1/0). “Offered” and “maybe” fail on purpose—they sound related but aren’t booleans.
+**They might ask:** “Wouldn’t it be better to keep the latest duplicate automatically?”  
+**Answer shape:** Maybe as a *suggested* default in a future product—with an audit log—but not as an invisible default. Choosing which record is true is a business judgment. The tool’s job is to surface the conflict.
 
-### “Bad data stays visible”
+### 2. One validation path for CLI, API, and recheck
 
-Coverage gap on a clean full-time row with `no` is the case a compliance person cares about. If I rejected that row as invalid, I’d hide it. If I auto-flipped coverage to yes, I’d lie.
+**Choice:** `internal/record` owns the rules. The CLI, `POST /api/validate`, and the browser’s “Recheck” all go through that package. The UI does not have its own copy of “what counts as full-time.”
 
-### “The workbook has to be inspectable”
+**Why:** Split-brain validation is how bugs ship—“looked fine in the UI, failed in the export,” or the reverse.
 
-Pasting summary numbers from the API would work until someone edits the sheet. Formulas mean the Summary tab is an audit trail against Clean Data / Exceptions. Tests check the formula *strings* and ranges; excelize does not run Excel’s calculation engine, and I’m honest about that.
+**Tradeoff:** Every change to a rule requires regenerating/fixtures and thinking about both CLI and web. Worth it.
 
-### “Security for a demo, stated clearly”
+**They might ask:** “Why not validate in the browser for snappiness?”  
+**Answer shape:** You can add client-side hints later for UX, but the server (or shared library) remains the source of truth for anything that hits the workbook.
 
-- 1 MiB upload limit; larger → 413 (reject, don’t truncate).
-- Must look like a `.csv`.
-- Content-Type checked, but we still parse the bytes.
-- Nothing stored; browser holds the working set.
-- No logins—OWASP would want auth; README says we skipped it for scope.
-- Formula-injection prefixing on export.
+### 3. Stateless API — the browser holds the working set
 
-### “Small packages, one job each”
+**Choice:** The server stores nothing. Upload bytes are parsed and discarded. Edited rows live in the browser until export.
 
-| Piece | Job |
+**Why:** Matches the assignment, reduces breach surface for a demo (no forgotten database of employee names), and keeps the architecture small.
+
+**Tradeoff:** Refresh loses work. No multi-user review queue. No “come back tomorrow.”
+
+**They might ask:** “How would you productionize this?”  
+**Answer shape:** Add auth, encrypt data in transit and at rest, persist review sessions with access control and retention policy, audit who changed what, and still keep validation deterministic. Stateless was a scope choice, not a belief that HR data should float in localStorage forever.
+
+### 4. Summary counts are Excel formulas, not pasted numbers
+
+**Choice:** The workbook recomputes clean-row counts, full-time months, gaps, hours, and exception counts with formulas against the data sheets.
+
+**Why:** A reviewer can change or filter data and still reason about the Summary tab. It is an auditability feature, not a flourish. Pasted numbers go stale the moment someone edits a cell.
+
+**Tradeoff:** excelize does not run Excel’s calculation engine. My tests assert the *formula text and ranges* are correct; they do not claim Excel already calculated them in CI. I say that out loud.
+
+**They might ask:** “Why not compute in Go and write values?”  
+**Answer shape:** Go already computed them for the UI and CLI summary. The workbook audience is different: people who live in Excel and need the sheet to defend itself.
+
+### 5. Domain scope is narrow on purpose
+
+**Choice:** Implement monthly 130-hour full-time + coverage-gap flags. Skip look-back, 1095-C codes, affordability, penalties.
+
+**Why:** Incomplete inputs + authoritative-looking outputs = dangerous. Scope discipline is a feature when the domain is regulated.
+
+**Tradeoff:** The demo does not showcase the full ACAPrime surface area.
+
+**They might ask:** “Do you understand look-back?”  
+**Answer shape:** Yes, at a high level—hours in a measurement period determine status in a later stability period. I did not implement it because the CSV does not carry measurement/stability windows, and a fake implementation would look more “done” than it is. I would want product + compliance input before encoding that.
+
+### 6. Security boundaries that match the threat of a public demo
+
+**Choice:**
+
+- 1 MiB upload limit (reject oversize; do not truncate mid-file)
+- Prefer `.csv` uploads
+- Check content type, but still parse bytes (do not trust headers alone)
+- Neutralize spreadsheet formula injection on export
+- No accounts in this demo (and the README admits that gap)
+
+**Why:** Employee names and IDs are sensitive even in synthetic fixtures. Upload and export are the two places untrusted strings enter Excel-land.
+
+**Tradeoff:** Without auth, anyone who can reach the demo can use it. Fine for a synthetic public demo; not fine for real employer files.
+
+**They might ask:** “What is CSV injection?”  
+**Answer shape:** If a cell starts with `=`, Excel may treat it as a formula. A name like `=1+1` or worse can become active content. I prefix risky text when writing xlsx cells. OWASP notes no mitigation is perfect for every spreadsheet tool; I still do the standard hardening and test it.
+
+### 7. Package boundaries: rules, reports, HTTP, and AI stay separate
+
+**Choice:**
+
+| Package | Responsibility |
 | --- | --- |
-| `internal/record` | Parse CSV + validate; never writes Excel or HTTP |
-| `internal/report` | Turn a Result into xlsx |
-| `internal/api` | HTTP only; calls record/report/suggest |
-| `internal/suggest` | Optional LLM; returns a suggestion, mutates nothing |
-| `cmd/audit` | CLI |
-| `cmd/server` | Process wiring + static UI |
-| `web/` | Svelte UI; proxies to API in dev |
+| `record` | Parse + validate only |
+| `report` | Build the workbook |
+| `api` | HTTP surface |
+| `suggest` | Optional LLM suggestions; never mutates rows |
+| `cmd/audit`, `cmd/server` | Wiring |
+| `web/` | UI and session helpers |
 
-That’s how I’d talk about architecture without buzzwords: **boundaries so rules live in one place**, and the UI can’t accidentally invent a different definition of full-time.
+**Why:** When rules live in one place, you can change HTTP or Excel without rewriting what “duplicate” means. When AI lives in `suggest`, it cannot casually become part of validation.
 
-### “What I skipped and why”
+**They might ask:** “How do you keep an LLM from becoming the system of record?”  
+**Answer shape:** Architecturally: suggest is optional, returns a proposal, and is tested to not apply values. Product-wise: a human must accept and recheck through deterministic rules.
 
-Look-back, 1095-C codes, DB, accounts, embedding the UI in the binary (`go:embed` can’t reach `../web/dist` cleanly with gitignored build output)—all deliberate. The assignment asked for a review queue and an export, kept stateless.
+### 8. AI is assistive, never authoritative
 
----
+**Choice:** Suggestions are off unless a key is set. Even when on, the API returns a proposed value; the server does not write it into the row. The UI only fills a field if the person clicks to use it, and they still must recheck.
 
-## A5. How I proved it works (about 2 minutes)
+**Why:** LLMs are good at “this cell looks like it should be 160.” They are bad at being the compliance brain. Auto-apply would blur the line between assistance and decision-making.
 
-**Automated**
-
-- Table-driven tests for parse shapes and every validation rule.
-- Golden JSON for `employees_messy.csv`—regenerate only after reading the diff.
-- Duplicate tests (including identical duplicates still held).
-- `go test -race`, coverage (~94% on `record`, ~80% module).
-- Fuzz the parser 60 seconds (~1.9M executions)—looking for panics / crashes on weird bytes.
-- API tests: happy path, bad JSON, wrong content type, oversized body, suggest off, suggest does not apply.
-- Workbook tests: sheets exist, formulas present, `SafeText` on `=1+1`, pivot when there’s data.
-- Vitest for the session helpers (grouping exceptions, movement messages).
-
-**Manual / browser**
-
-Headless Chrome against the real UI: upload fixture → see 46/18/28 → fix row 45 → recheck → download → open the zip and confirm Summary formulas and sheets. Screenshots and the write-up live in `docs/how-i-tested.md`.
-
-**Demo script if they want a live walk**
-
-1. Open the Fly URL.  
-2. Upload `employees_messy.csv`.  
-3. Point at first review row (missing id).  
-4. Fix E044 / row 45 → recheck.  
-5. Export; open Summary; show a formula and the disclaimer.
+**They might ask:** “How did you use AI while building this?”  
+**Answer shape:** An agent wrote a lot of scaffolding. I set the product rules, reviewed diffs against those rules, and verified with tests plus a real browser pass. I also caught concrete agent mistakes (CLI flag order, pivot range quoting, a catch-all static route that could swallow API paths). Those are fixed and tested. I would not let an agent choose which duplicate to keep.
 
 ---
 
-## A6. Closing the coding-project section (30 seconds)
+## How I know it works
 
-**Say:**
+**Automated:** table tests for parsing and rules; a golden JSON file for the messy sample CSV; race detector; fuzzing the parser for about a minute; API tests for bad uploads and the “suggest does not apply” behavior; workbook tests for formulas and safe text; a few front-end unit tests.
 
-> So the through-line is: honest parsing, explicit rules tied to IRS monthly measurement where they apply, no silent resolution of conflicts, a human review loop, and an Excel artifact whose numbers you can recalculate. The rest of ACA filing complexity is intentionally not faked.
+**Manual:** upload the sample file, fix row 45 (hours `nope` / coverage `perhaps` → `40` / `yes`), recheck, download the workbook, and confirm the sheets and formulas. That walkthrough is written up under `docs/how-i-tested.md`.
 
-Then pause. Let Blake steer.
-
----
-
-# Part B — AI usage and verification (about 5–8 minutes, or woven into Part A)
-
-## B1. Your stance in one breath
-
-**Say:**
-
-> An agent wrote most of the scaffolding—packages, first-pass tests, UI, excelize wiring. I did not treat that as finished work. I treated it like a fast junior: great for typing and exploring APIs, not allowed to set product policy or change data without a person in the loop.
->
-> I trust the **rules I wrote down** and the **tests and fixtures that lock those rules**. I do not trust “the model said so.”
+If you demo live: use the Fly URL, upload the sample CSV, show a review reason, fix row 45, export, open Summary and point at a formula and the disclaimer.
 
 ---
 
-## B2. How you actually worked with the agent (process)
+## Using AI on this project (study section)
 
-Walk this as a timeline:
+### How I worked with it
 
-1. **Research and decisions first**  
-   IRS pages, CSV/RFC behavior, OWASP upload + injection, excelize docs. Decisions like “hold all duplicates” and “MDY only” were mine before generation.
+1. I researched and decided the rules (130 hours, hold duplicates, date formats, no silent caps).
+2. The agent implemented structure, tests, UI, Excel wiring under those constraints.
+3. I reviewed the diff like I would a junior PR—especially anything that drops data, guesses, or widens HTTP routes.
+4. Green tests were necessary but not sufficient; I still ran the real file through the UI and opened the xlsx.
+5. I documented where the agent was wrong instead of pretending the first draft was clean.
 
-2. **Agent implements under those constraints**  
-   “Build parse/validate with these rules… workbook with formulas… Svelte review that rechecks through the API…”
+### Three mistakes worth being able to explain
 
-3. **I read the diff against the decisions**  
-   Especially: anything that drops rows, picks winners, mutates on suggest, soft-parses dates, or routes HTTP broadly.
+1. **`-o` after the filename** — Go’s flag parser stops at the first non-flag argument, so `audit file.csv -o out.xlsx` did not behave as documented until I normalized argument order and tested both orders.
+2. **Pivot range quoting** — the workbook wrote, but the pivot range string was wrong; “file created” ≠ “artifact is correct.”
+3. **Catch-all UI route** — serving the SPA too broadly could intercept API paths; UI is mounted only on `/` and `/assets/`, with API routes registered explicitly.
 
-4. **Automated gates**  
-   vet, race tests, fuzz, golden file, Vitest.
+### Verification mindset
 
-5. **Black-box proof**  
-   Real upload, real edit, real xlsx open—not just green tests.
+I do not “trust AI code.” I trust:
 
-6. **Write down where the agent was wrong**  
-   README calls out three bugs on purpose. That’s part of the verification story, not a confession to hide.
-
----
-
-## B3. Three agent mistakes — tell them as stories (this is gold)
-
-### Bug 1 — CLI `-o` after the filename
-
-**What I wanted:** `audit employees.csv -o out.xlsx`  
-**What Go’s flag package does:** stops parsing flags at the first non-flag word. So after `employees.csv`, it ignored `-o`.  
-**What the agent shipped:** “documented” that usage, but the binary didn’t honor it.  
-**How I caught it:** Ran the documented command; output path was wrong / default.  
-**Fix:** `normalizeArgs` pulls `-o` (and friends) before the filename, then hands the list to `flag`. Tests run both `file -o out` and `-o out file`.
-
-**Plain English moral:** Agents copy common CLI patterns and docs; they don’t always reconcile them with library quirks. I verify the command I tell reviewers to run.
-
-### Bug 2 — Pivot range quoting
-
-**What I wanted:** A real Excel pivot over Clean Data.  
-**What went wrong:** The sheet range string quoted the sheet name incorrectly, so the pivot was useless/broken.  
-**How I caught it:** Opened the workbook / asserted pivot tables in tests.  
-**Fix:** Correct range quoting; test that a pivot exists when there is clean data, and a clear note when there isn’t.
-
-**Moral:** Spreadsheet APIs are stringly typed. Tests that only check “file writes without error” aren’t enough—inspect the artifact.
-
-### Bug 3 — Catch-all `GET /` ate API routes
-
-**What I wanted:** Serve the built UI from the same Go process.  
-**What the agent did:** A broad file-server mount that could answer paths meant for `/api/...`.  
-**How I caught it:** Hitting API paths didn’t behave like the API.  
-**Fix:** Mount UI only on exact `/` and `/assets/`. API routes registered explicitly with Go 1.22 method patterns (`POST /api/validate`, etc.).
-
-**Moral:** “Serve the SPA” is a classic footgun. Routing is part of product behavior; I test method-not-allowed and path separation.
+- written product rules
+- tests and fixtures that encode those rules
+- opening the real output
+- keeping humans in the loop for judgment calls
 
 ---
 
-## B4. Hard lines the agent is not allowed to cross
+## If they ask “what would you do next?”
 
-Memorize these three:
+Good answers sound concrete:
 
-1. **Do not choose which duplicate to keep.**  
-2. **Do not apply an LLM suggestion by itself.** Suggest returns JSON; the UI copies into a field only on click; recheck still required. Test name: `TestSuggestDoesNotApplyTheValue`.  
-3. **Do not invent compliance answers** (look-back, penalties, 1095 codes) from incomplete columns.
-
-Also: if the model returns prose instead of JSON for suggest, we reject it. Empty or huge suggestions rejected. Suggest with no API key → feature off (404), not a half-working button.
-
----
-
-## B5. Verification checklist you can recite
-
-When asked “how do you verify AI-generated code?”:
-
-1. Diff vs written product rules.  
-2. Table tests + golden fixture for the messy CSV.  
-3. Fuzz parsers / anything that touches untrusted bytes.  
-4. Race detector.  
-5. HTTP edge cases (size, content type, methods).  
-6. Open the binary artifact (xlsx) and check formulas / safe text.  
-7. Drive the UI once the way a person would.  
-8. Negative tests for dangerous features (suggest doesn’t mutate; duplicates not auto-resolved).
-
-**Closer:**
-
-> AI sped up building this. The correctness story is human judgment on scope, deterministic validation in Go, and a harness that fails when those rules drift.
+- Authentication and authorization before any real employer data
+- Persisted review sessions with audit trail (who changed which field)
+- Virus scanning / stronger upload controls
+- Look-back measurement **after** the input model supports it
+- Clearer separation of environments (demo synthetic data vs. customer data)
+- Keep the core invariant: **deterministic validation; no silent resolution of conflicts**
 
 ---
 
-# Part C — Timed talk track (pick one)
+## A few facts worth remembering
 
-## Option 1 — Mostly project (15 min)
-
-| Min | Topic |
-| --- | --- |
-| 0–1 | What it is + live demo pointer |
-| 1–3 | Why messy hours matter; 130-hour rule; what I refused to fake |
-| 3–7 | Life of a file: parse → validate → review → Excel |
-| 7–12 | Judgment calls: duplicates, dates, hours, formulas, security, packages |
-| 12–14 | How I tested (auto + browser + fixture numbers) |
-| 14–15 | Bridge: “Most of it was agent-assisted; here’s how I caught mistakes…” (short) or stop for questions |
-
-## Option 2 — Project + AI split (15–18 min)
-
-Use Part A through A5 (~12 min), then Part B (~5 min) with the three bug stories.
-
-## If they interrupt
-
-- **“Show me”** → jump to A5 demo script.  
-- **“Why Go?”** → straightforward errors, great CSV/HTTP stdlib, table tests + fuzz, excelize for xlsx; Svelte for a small reactive review UI without a heavy SPA stack.  
-- **“Would you ship this?”** → Not as filing software. As an internal cleanup assist: add auth, persistence, look-back with real inputs, virus scanning, audit logging—keep the “no silent guesses” core.  
-- **“Where did AI fail?”** → Bug stories B3; don’t be vague.
+- Sample file: **46** submitted, **18** clean, **28** in review  
+- Fix demo: **row 45** / E044  
+- Duplicates: **E037** — both held  
+- Formula-looking name: **E009** `=1+1`  
+- Full-time threshold: **130** hours / month  
+- Demo: https://employee-hours-audit.fly.dev/
 
 ---
 
-# Part D — Pocket examples (memorize 5)
+## How to study this
 
-1. **46 / 18 / 28** — fixture headline counts.  
-2. **Row 45 / E044** — `nope` / `perhaps` → `40` / `yes` → moves to clean.  
-3. **E037 duplicates** — both held.  
-4. **E009 `=1+1`** — valid name; workbook stores with leading quote.  
-5. **130 hours** — IRS monthly full-time; coverage `no` → gap flag, still clean.
-
----
-
-# Out of scope for this doc
-
-Excel interview skills test and TradeSiteUsa live elsewhere. This file is only what you can defend from **employee-hours-audit**.
+1. Read the whole post once without trying to memorize.
+2. Close it and explain out loud: what the tool does, what happens to a file, and three design decisions you care about.
+3. Skim the design-decision section again and pick the tradeoffs you feel strongest about (fail closed, one validation path, formulas, AI not authoritative are the strongest set).
+4. Click through the live demo once with the sample file so the story is tied to something you have seen.
