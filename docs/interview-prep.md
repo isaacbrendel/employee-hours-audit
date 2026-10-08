@@ -293,3 +293,107 @@ Good answers sound concrete:
 2. Close it and explain out loud: what the tool does, what happens to a file, and three design decisions you care about.
 3. Skim the design-decision section again and pick the tradeoffs you feel strongest about (fail closed, one validation path, formulas, AI not authoritative are the strongest set).
 4. Click through the live demo once with the sample file so the story is tied to something you have seen.
+
+---
+
+## Short talk script (~2–3 minutes)
+
+Use this as a backbone, then put it in your own words:
+
+> I built a Go service that audits messy monthly employee-hours CSVs, with a Svelte UI for fixing bad rows and an Excel export.
+>
+> You give it a file. Go parses it carefully, then checks each row against a fixed set of rules—required fields, date formats, hours as a plain number, coverage as yes/no, and so on. Anything that fails goes to a review queue with a reason. I don’t silently fix or drop those rows.
+>
+> There’s one special case after the field checks: if the same employee and month show up twice, I hold every copy. I don’t pick a winner.
+>
+> Rows that pass can still be flagged. If someone has 130 or more hours, they’re marked full-time under the IRS monthly measurement method. If they’re full-time and coverage is no, that’s a coverage gap flag—but the row stays in clean data, because a valid “no” is information a reviewer needs.
+>
+> On the sample file you get about 46 rows in, 18 clean, 28 in review. In the UI I can fix a bad row—like hours “nope” and coverage “perhaps”—recheck through the same Go rules, and download a workbook. The Summary counts in that workbook are Excel formulas pointed at the data sheets, not numbers I pasted in.
+>
+> An agent helped write a lot of the code. I owned the rules and verified with tests, a golden fixture, and a real browser pass. Suggestions from an LLM, if enabled, never apply themselves—a person has to accept and recheck.
+
+If they want a live demo after that: upload `employees_messy.csv` → show counts → fix row 45 → recheck → export → open Summary and point at a formula.
+
+---
+
+## What the outputs look like
+
+### CLI (same audit as the website)
+
+```text
+$ audit testdata/employees_messy.csv -o hours-audit.xlsx
+
+warning: ignored extra column "Department"    ← stderr
+
+Rows submitted:   46                          ← stdout
+Clean rows:       18
+Rows with errors: 28                          ← distinct rows in review
+Exception items:  34                          ← can be > 28 (one row, many problems)
+Full-time months: 5
+Coverage gaps:    1
+Total hours:      1816
+Wrote hours-audit.xlsx
+```
+
+Exit codes: **0** = workbook written (even with review rows), **1** = can’t read/parse file, **2** = bad usage.
+
+### Website status line
+
+After upload:
+
+> 46 rows submitted. 18 clean. 28 in review.
+
+After fixing row 45 and rechecking:
+
+> Row 45 moved to clean data. 27 rows are still in review.
+
+Counts on screen: Submitted / Clean / In review / Full time / Coverage gaps, plus the Department warning.
+
+### One clean row vs one review exception (shape)
+
+Clean (E002 — full-time, coverage no → gap flag, still clean):
+
+```json
+{
+  "employee_id": "E002",
+  "hours_worked": 140,
+  "coverage_offered": false,
+  "full_time": true,
+  "coverage_gap": true
+}
+```
+
+Exception (held for review):
+
+```json
+{
+  "row": 45,
+  "field": "hours_worked",
+  "reason": "hours \"nope\" must be a plain decimal number such as 160 or 37.5",
+  "raw": { "...original strings..." }
+}
+```
+
+### Excel workbook
+
+Four sheets:
+
+| Sheet | What’s in it |
+| --- | --- |
+| **Summary** | Title, disclaimer, metrics. Most values are formulas (`COUNTIF` / `SUM`…) over the other sheets. “Rows submitted” is the one typed number. |
+| **Clean Data** | Rows that passed. Full-time / gap columns are formulas like `=E2>=130`. |
+| **Exceptions** | Every problem line (row, field, reason, raw values). |
+| **Pivot** | Hours by month (convenience). |
+
+Also: names like `=1+1` are stored with a leading quote so Excel treats them as text.
+
+### Mental model of the result
+
+```text
+CSV in
+  → warnings (extra columns, etc.)
+  → clean rows (+ optional full-time / gap flags)
+  → exception items (why each bad field failed)
+  → summary counts
+  → optional .xlsx with the same story inside
+```
